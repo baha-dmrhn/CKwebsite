@@ -1,0 +1,114 @@
+name: Build CK Enerji Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      site_url:
+        description: "APK içinde açılacak site adresi"
+        required: true
+        default: "https://ck-website.onrender.com"
+  push:
+    branches:
+      - main
+    paths:
+      - "CK-ENERJI-ANDROID/**"
+      - ".github/workflows/android-apk.yml"
+
+jobs:
+  build-apk:
+    name: Build installable APK
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      CK_SITE_URL: ${{ inputs.site_url || 'https://ck-website.onrender.com' }}
+      CK_ANDROID_KEYSTORE_BASE64: ${{ secrets.CK_ANDROID_KEYSTORE_BASE64 }}
+      CK_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.CK_ANDROID_KEYSTORE_PASSWORD }}
+      CK_ANDROID_KEY_ALIAS: ${{ secrets.CK_ANDROID_KEY_ALIAS }}
+      CK_ANDROID_KEY_PASSWORD: ${{ secrets.CK_ANDROID_KEY_PASSWORD }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+          cache-dependency-path: |
+            CK-ENERJI-ANDROID/*.gradle
+            CK-ENERJI-ANDROID/gradle/wrapper/gradle-wrapper.properties
+            CK-ENERJI-ANDROID/app/*.gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android packages
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Select APK signing mode
+        shell: bash
+        run: |
+          if [[ -n "$CK_ANDROID_KEYSTORE_BASE64" && \
+                -n "$CK_ANDROID_KEYSTORE_PASSWORD" && \
+                -n "$CK_ANDROID_KEY_ALIAS" && \
+                -n "$CK_ANDROID_KEY_PASSWORD" ]]; then
+            mkdir -p "$RUNNER_TEMP/ck-signing"
+            printf '%s' "$CK_ANDROID_KEYSTORE_BASE64" \
+              | base64 --decode \
+              > "$RUNNER_TEMP/ck-signing/ck-release.jks"
+            echo "CK_ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/ck-signing/ck-release.jks" >> "$GITHUB_ENV"
+            echo "CK_ANDROID_BUILD_TYPE=release" >> "$GITHUB_ENV"
+            echo "CK_ANDROID_APK_PATH=CK-ENERJI-ANDROID/app/build/outputs/apk/release/app-release.apk" >> "$GITHUB_ENV"
+            echo "::notice::Kalıcı release anahtarıyla imzalı APK üretilecek."
+          else
+            echo "CK_ANDROID_BUILD_TYPE=debug" >> "$GITHUB_ENV"
+            echo "CK_ANDROID_APK_PATH=CK-ENERJI-ANDROID/app/build/outputs/apk/debug/app-debug.apk" >> "$GITHUB_ENV"
+            echo "::notice::Release secret'ları bulunamadı; imzalı debug APK üretilecek."
+          fi
+
+      - name: Restore development signing key
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: ck-android-debug-keystore-v1
+
+      - name: Build APK
+        working-directory: CK-ENERJI-ANDROID
+        shell: bash
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --version
+          if [[ "$CK_ANDROID_BUILD_TYPE" == "release" ]]; then
+            ./gradlew clean assembleRelease -PCK_SITE_URL="$CK_SITE_URL" --stacktrace
+          else
+            ./gradlew clean assembleDebug -PCK_SITE_URL="$CK_SITE_URL" --stacktrace
+          fi
+
+      - name: Verify APK signature
+        run: |
+          test -f "$CK_ANDROID_APK_PATH"
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify \
+            --verbose \
+            --print-certs \
+            "$CK_ANDROID_APK_PATH"
+
+      - name: Prepare installable APK
+        run: |
+          mkdir -p apk-output
+          cp "$CK_ANDROID_APK_PATH" apk-output/CK-Enerji.apk
+
+      - name: Show APK output
+        run: |
+          find apk-output -type f -name "*.apk" -print
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: CK-Enerji-APK
+          path: apk-output/CK-Enerji.apk
+          if-no-files-found: error
