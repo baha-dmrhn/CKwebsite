@@ -6,7 +6,7 @@ on:
       site_url:
         description: "APK içinde açılacak site adresi"
         required: true
-        default: "https://ck-website.onrender.com"
+        default: "https://ck-website-zjf6.onrender.com"
   push:
     branches:
       - main
