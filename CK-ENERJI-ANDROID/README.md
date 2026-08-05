@@ -10,7 +10,7 @@ Ana bölümler arasında ekranın altındaki uygulama gezinmesiyle geçiş yapı
 Varsayılan adres:
 
 ```text
-https://ck-website.onrender.com
+https://ck-website-zjf6.onrender.com
 ```
 
 Render linkin farklıysa `gradle.properties` içindeki `CK_SITE_URL` satırını değiştir.
