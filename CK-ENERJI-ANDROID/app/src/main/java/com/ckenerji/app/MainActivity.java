@@ -181,6 +181,7 @@ public class MainActivity extends Activity {
     };
     private int unexpectedStartupPages;
     private boolean startupLoading;
+    private boolean mainFrameLoadFailed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -225,6 +226,10 @@ public class MainActivity extends Activity {
 
             @Override
             public void onPageFinished(WebView view, String url) {
+                if (mainFrameLoadFailed) {
+                    showError();
+                    return;
+                }
                 String title = view.getTitle();
                 String normalizedTitle = title == null ? "" : title.toLowerCase();
                 Uri finishedUri = Uri.parse(url);
@@ -287,7 +292,10 @@ public class MainActivity extends Activity {
 
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-                if (request.isForMainFrame()) showError();
+                if (request.isForMainFrame()) {
+                    mainFrameLoadFailed = true;
+                    showError();
+                }
             }
 
             @Override
@@ -296,7 +304,11 @@ public class MainActivity extends Activity {
                     WebResourceRequest request,
                     WebResourceResponse errorResponse
             ) {
-                if (request.isForMainFrame() && errorResponse.getStatusCode() >= 400) showError();
+                if (request.isForMainFrame() && errorResponse.getStatusCode() >= 400) {
+                    mainFrameLoadFailed = true;
+                    view.stopLoading();
+                    showError();
+                }
             }
         });
 
@@ -786,6 +798,7 @@ public class MainActivity extends Activity {
             return;
         }
         startupLoading = true;
+        mainFrameLoadFailed = false;
         unexpectedStartupPages = 0;
         mainHandler.removeCallbacks(startupTimeout);
         mainHandler.postDelayed(startupTimeout, STARTUP_TIMEOUT_MS);
