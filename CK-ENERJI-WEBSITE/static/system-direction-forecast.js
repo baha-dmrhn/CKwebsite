@@ -225,8 +225,8 @@ function renderSamples(samples = []) {
 
 function validationResultLabel(row) {
   if (!row.actualPublished) return "Bekleniyor";
-  if (row.match) return "Tuttu";
-  return "Sapma";
+  if (row.match) return "Başarılı";
+  return "Başarısız";
 }
 
 function shortDirectionLabel(category) {
