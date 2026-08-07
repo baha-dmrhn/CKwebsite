@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: panel-ck
+    name: ck-website
     runtime: docker
     plan: free
     region: frankfurt
