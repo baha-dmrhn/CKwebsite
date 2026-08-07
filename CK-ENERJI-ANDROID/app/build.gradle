@@ -3,7 +3,7 @@ plugins {
 }
 
 def siteUrl = providers.gradleProperty("CK_SITE_URL")
-        .orElse("https://ck-website-zjf6.onrender.com")
+        .orElse("https://panel-ck.onrender.com")
         .get()
 def releaseStorePath = System.getenv("CK_ANDROID_KEYSTORE_PATH") ?: ""
 def releaseStorePassword = System.getenv("CK_ANDROID_KEYSTORE_PASSWORD") ?: ""
