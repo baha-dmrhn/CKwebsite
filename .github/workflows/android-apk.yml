@@ -6,7 +6,7 @@ on:
       site_url:
         description: "APK içinde açılacak site adresi"
         required: true
-        default: "https://ck-website-zjf6.onrender.com"
+        default: "https://panel-ck.onrender.com/"
   push:
     branches:
       - main
@@ -21,7 +21,7 @@ jobs:
     permissions:
       contents: read
     env:
-      CK_SITE_URL: ${{ inputs.site_url || 'https://ck-website-zjf6.onrender.com' }}
+      CK_SITE_URL: ${{ inputs.site_url || 'https://panel-ck.onrender.com/' }}
       CK_ANDROID_KEYSTORE_BASE64: ${{ secrets.CK_ANDROID_KEYSTORE_BASE64 }}
       CK_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.CK_ANDROID_KEYSTORE_PASSWORD }}
       CK_ANDROID_KEY_ALIAS: ${{ secrets.CK_ANDROID_KEY_ALIAS }}
