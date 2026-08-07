@@ -151,7 +151,7 @@ public class MainActivity extends Activity {
     private ProgressBar progressBar;
     private LinearLayout appLayout;
     private LinearLayout bottomNavigation;
-    private LinearLayout splashView;
+    private FrameLayout splashView;
     private LinearLayout errorView;
     private View appMenuSpacer;
     private TextView appMenuButton;
@@ -462,19 +462,21 @@ public class MainActivity extends Activity {
                 ViewGroup.LayoutParams.MATCH_PARENT
         ));
 
-        splashView = new LinearLayout(this);
-        splashView.setOrientation(LinearLayout.VERTICAL);
-        splashView.setGravity(Gravity.CENTER);
-        splashView.setPadding(dp(28), dp(28), dp(28), dp(28));
+        splashView = new FrameLayout(this);
         splashView.setBackgroundColor(Color.rgb(11, 25, 48));
 
         ImageView splashLogo = new ImageView(this);
         splashLogo.setImageResource(com.ckenerji.app.R.drawable.ck_enerji_logo);
         splashLogo.setAdjustViewBounds(true);
+        splashLogo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
         splashLogo.setPadding(0, 0, 0, 0);
         splashLogo.setBackgroundColor(Color.TRANSPARENT);
-        LinearLayout.LayoutParams logoParams = new LinearLayout.LayoutParams(dp(116), dp(116));
-        logoParams.bottomMargin = dp(22);
+        FrameLayout.LayoutParams logoParams = new FrameLayout.LayoutParams(dp(116), dp(116));
+        logoParams.gravity = Gravity.CENTER;
+
+        LinearLayout splashText = new LinearLayout(this);
+        splashText.setOrientation(LinearLayout.VERTICAL);
+        splashText.setGravity(Gravity.CENTER);
 
         splashTitle = new TextView(this);
         splashTitle.setText("CK Enerji");
@@ -490,9 +492,18 @@ public class MainActivity extends Activity {
         splashMessage.setGravity(Gravity.CENTER);
         splashMessage.setPadding(0, dp(8), 0, 0);
 
+        splashText.addView(splashTitle);
+        splashText.addView(splashMessage);
+
+        FrameLayout.LayoutParams textParams = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        textParams.gravity = Gravity.CENTER;
+        textParams.topMargin = dp(112);
+
         splashView.addView(splashLogo, logoParams);
-        splashView.addView(splashTitle);
-        splashView.addView(splashMessage);
+        splashView.addView(splashText, textParams);
         root.addView(splashView, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
