@@ -1,0 +1,5 @@
+window.CK_CONFIG = {
+  // Web sürümünde boş bırakılır. Mobil uygulamada HTTPS API adresi yazılır.
+  // Örnek: "https://panel.ckenerji.com"
+  apiBaseUrl: ""
+};
