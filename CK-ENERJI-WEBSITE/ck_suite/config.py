@@ -4,7 +4,7 @@ from __future__ import annotations
 
 
 ASSET_VERSIONS: dict[str, int] = {
-    "/android-app.css": 16,
+    "/android-app.css": 18,
     "/piyasa/app.js": 62,
     "/piyasa/styles.css": 41,
     "/piyasa/config.js": 1,
@@ -28,9 +28,9 @@ ASSET_VERSIONS: dict[str, int] = {
     "/suite-assets/ck-logo.png": 6,
     "/suite-assets/ck-logo-white.png": 1,
     "/suite-assets/ck-mark.png": 3,
-    "/suite-assets/icon-192.png": 6,
-    "/suite-assets/icon-512.png": 6,
-    "/suite-assets/apple-touch-icon.png": 6,
+    "/suite-assets/icon-192.png": 7,
+    "/suite-assets/icon-512.png": 7,
+    "/suite-assets/apple-touch-icon.png": 7,
     "/favicon.ico": 4,
 }
 
