@@ -664,6 +664,11 @@
       'Batı Akdeniz':'Batı Akd.', 'Doğu Akdeniz':'Doğu Akd.', 'Batı Karadeniz':'Batı Kar.',
       'Doğu Karadeniz':'Doğu Kar.', 'Konya Kapalı':'Konya', 'Van Gölü':'Van Gölü'
     };
+    const BASIN_LABEL_ANCHORS = {
+      // İstanbul'un Avrupa ve Anadolu yakalarının arasındaki görsel merkez.
+      'Marmara':[29.02, 40.96]
+    };
+    const BASIN_LABEL_FONT_BOOST = {'Kuzey Ege':1.14};
     const normalizeBasinName = value => String(value || '').toLocaleLowerCase('tr-TR').replace(/[^a-zçğıöşü0-9]+/g, ' ').trim();
     const projectTurkeyPoint = ([longitude, latitude]) => ({
       x: 30 + (longitude - MAP_BOUNDS.minLongitude) / (MAP_BOUNDS.maxLongitude - MAP_BOUNDS.minLongitude) * 940,
@@ -683,23 +688,84 @@
       const projected = projectTurkeyPoint(point);
       return `${index ? 'L' : 'M'}${projected.x.toFixed(2)},${projected.y.toFixed(2)}`;
     }).join(' ')} Z`).join(' ');
+    const projectedOuterRings = geometry => geometryOuterRings(geometry).map(ring => ring.map(projectTurkeyPoint));
+    const pointInsideRing = (point, ring) => {
+      let inside = false;
+      for (let index = 0, previous = ring.length - 1; index < ring.length; previous = index++) {
+        const currentPoint = ring[index], previousPoint = ring[previous];
+        if (((currentPoint.y > point.y) !== (previousPoint.y > point.y))
+          && point.x < (previousPoint.x - currentPoint.x) * (point.y - currentPoint.y)
+            / (previousPoint.y - currentPoint.y || Number.EPSILON) + currentPoint.x) inside = !inside;
+      }
+      return inside;
+    };
+    const segmentDistance = (point, first, second) => {
+      const dx = second.x - first.x, dy = second.y - first.y;
+      const lengthSquared = dx * dx + dy * dy;
+      const ratio = lengthSquared
+        ? Math.max(0, Math.min(1, ((point.x-first.x)*dx + (point.y-first.y)*dy) / lengthSquared))
+        : 0;
+      return Math.hypot(point.x - (first.x + ratio*dx), point.y - (first.y + ratio*dy));
+    };
+    const pointClearance = (point, ring) => Math.min(...ring.map((current, index) =>
+      segmentDistance(point, current, ring[(index + 1) % ring.length])));
     function polygonLabelPoint(feature) {
-      const rings = geometryOuterRings(feature.geometry);
-      const ringArea = ring => Math.abs(ring.reduce((total, point, index) => {
-        const next = ring[(index + 1) % ring.length];
-        return total + point[0] * next[1] - next[0] * point[1];
-      }, 0));
-      const ring = [...rings].sort((first, second) => ringArea(second) - ringArea(first))[0] || [];
-      if (!ring.length) return {x:500,y:215};
-      let twiceArea = 0, longitudeTotal = 0, latitudeTotal = 0;
-      ring.forEach((point, index) => {
-        const next = ring[(index + 1) % ring.length], cross = point[0] * next[1] - next[0] * point[1];
-        twiceArea += cross;
-        longitudeTotal += (point[0] + next[0]) * cross;
-        latitudeTotal += (point[1] + next[1]) * cross;
-      });
-      if (Math.abs(twiceArea) < .000001) return projectTurkeyPoint(ring[0]);
-      return projectTurkeyPoint([longitudeTotal / (3 * twiceArea), latitudeTotal / (3 * twiceArea)]);
+      const rings = projectedOuterRings(feature.geometry).filter(ring => ring.length >= 3);
+      if (!rings.length) return {x:500, y:215, clearance:12, ring:[]};
+      const ring = rings.sort((first, second) => {
+        const boundsArea = candidate => {
+          const xs = candidate.map(point => point.x), ys = candidate.map(point => point.y);
+          return (Math.max(...xs)-Math.min(...xs)) * (Math.max(...ys)-Math.min(...ys));
+        };
+        return boundsArea(second) - boundsArea(first);
+      })[0];
+      const xs = ring.map(point => point.x), ys = ring.map(point => point.y);
+      const bounds = {left:Math.min(...xs), right:Math.max(...xs), top:Math.min(...ys), bottom:Math.max(...ys)};
+      let best = null;
+      // Küçük bir grid araması, girintili havzalarda ağırlık merkezinden daha
+      // güvenli olan ve sınırlara en uzak iç noktayı bulur.
+      for (let step = 12; step >= 2; step /= 2) {
+        const search = best
+          ? {left:best.x-step*2, right:best.x+step*2, top:best.y-step*2, bottom:best.y+step*2}
+          : bounds;
+        for (let y=search.top; y<=search.bottom; y+=step) for (let x=search.left; x<=search.right; x+=step) {
+          const point = {x, y};
+          if (!pointInsideRing(point, ring)) continue;
+          const clearance = pointClearance(point, ring);
+          if (!best || clearance > best.clearance) best = {...point, clearance};
+        }
+      }
+      return {...(best || ring[0]), clearance:best?.clearance || 8, ring};
+    }
+    function basinLabelPoint(feature, basinName) {
+      const anchor = BASIN_LABEL_ANCHORS[basinName];
+      if (!anchor) return polygonLabelPoint(feature);
+      return {...projectTurkeyPoint(anchor), clearance:18, ring:[], fixed:true};
+    }
+    const labelBoxesOverlap = (first, second) => !(
+      first.right + 4 <= second.left || second.right + 4 <= first.left
+      || first.bottom + 3 <= second.top || second.bottom + 3 <= first.top
+    );
+    function collisionSafeLabelPoint(origin, labelText, occupied, fontBoost=1) {
+      const fontSize = Math.min(14, Math.max(8.5, Math.min(12.5, origin.clearance * .72)) * fontBoost);
+      const width = Math.min(92, Math.max(34, labelText.length * fontSize * .55));
+      const height = 25;
+      const candidates = [{x:origin.x,y:origin.y}];
+      for (const radius of origin.fixed ? [] : [10,18,26,34]) {
+        for (const [dx,dy] of [[0,-1],[1,0],[0,1],[-1,0],[.7,-.7],[.7,.7],[-.7,.7],[-.7,-.7]]) {
+          candidates.push({x:origin.x+dx*radius,y:origin.y+dy*radius});
+        }
+      }
+      for (const candidate of candidates) {
+        if (origin.ring.length && !pointInsideRing(candidate, origin.ring)) continue;
+        const box = {left:candidate.x-width/2,right:candidate.x+width/2,top:candidate.y-12,bottom:candidate.y+13};
+        if (occupied.some(existing => labelBoxesOverlap(box, existing))) continue;
+        occupied.push(box);
+        return {...candidate, fontSize};
+      }
+      const fallbackBox = {left:origin.x-width*.4,right:origin.x+width*.4,top:origin.y-10,bottom:origin.y+11};
+      occupied.push(fallbackBox);
+      return {x:origin.x,y:origin.y,fontSize:Math.max(7.5,fontSize*.8)};
     }
     async function loadBasinGeoJson() {
       if (basinGeoJson) return;
@@ -760,6 +826,7 @@
         loading.textContent = 'Gerçek havza sınırları yükleniyor…';
         svg.append(loading);
       } else {
+        const occupiedLabels = [];
         [...basinGeoJson.features].sort((first, second) => Number(first.properties?.ID || 0) - Number(second.properties?.ID || 0)).forEach(feature => {
           const geoName = String(feature.properties?.HAVZA_ADI || feature.properties?.ETIKET || 'Havza').trim();
           const basin = basinData.get(normalizeBasinName(geoName));
@@ -785,12 +852,19 @@
             ? `${geoName} · ${hasAverage ? `%${number.format(average)}` : 'Doluluk verisi yok'} · ${basin.dams?.length || 0} baraj`
             : `${geoName} · EPİAŞ baraj verisi bulunmuyor`;
           path.append(title);
-          const labelPoint = polygonLabelPoint(feature);
+          const shortName = BASIN_SHORT_NAMES[geoName] || geoName;
+          const labelPoint = collisionSafeLabelPoint(
+            basinLabelPoint(feature, geoName),
+            shortName,
+            occupiedLabels,
+            BASIN_LABEL_FONT_BOOST[geoName] || 1
+          );
           const label = document.createElementNS(MAP_NAMESPACE, 'text');
           label.setAttribute('class', 'baraj-basin-map-label');
           label.setAttribute('x', labelPoint.x); label.setAttribute('y', labelPoint.y - 3); label.setAttribute('text-anchor', 'middle');
+          label.style.setProperty('--basin-label-size', `${labelPoint.fontSize}px`);
           const nameLine = document.createElementNS(MAP_NAMESPACE, 'tspan');
-          nameLine.setAttribute('x', labelPoint.x); nameLine.textContent = BASIN_SHORT_NAMES[geoName] || geoName;
+          nameLine.setAttribute('x', labelPoint.x); nameLine.textContent = shortName;
           const valueLine = document.createElementNS(MAP_NAMESPACE, 'tspan');
           valueLine.setAttribute('class', 'baraj-basin-map-value'); valueLine.setAttribute('x', labelPoint.x); valueLine.setAttribute('dy', '12');
           valueLine.textContent = Number.isFinite(average) ? `%${number.format(average)}` : 'veri yok';
