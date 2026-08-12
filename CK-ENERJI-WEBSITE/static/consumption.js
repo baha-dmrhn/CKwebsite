@@ -186,11 +186,6 @@
       input.value = today;
       corrected = true;
     }
-    const atToday = input.value >= today;
-    const display = $("consumptionDateDisplay");
-    if (display) display.textContent = displayDate(input.value);
-    $("consumptionNext").disabled = atToday;
-    $("consumptionNext").setAttribute("aria-disabled", String(atToday));
     if (corrected && announce) {
       showAlert("Bugünden ileri bir tarih seçilemez.");
     }
@@ -515,19 +510,6 @@
     }
   }
 
-  function shiftSelection(days) {
-    const current = $("consumptionDate").value || todayTR();
-    const target = shiftedDate(current, days);
-    const limited = target > todayTR() ? todayTR() : target;
-    if (limited === current) {
-      constrainDate();
-      return;
-    }
-    $("consumptionDate").value = limited;
-    constrainDate();
-    loadData();
-  }
-
   $("consumptionDate").value = todayTR();
   $("consumptionCompareDate").value = shiftedDate(todayTR(), -1);
   constrainDate();
@@ -536,8 +518,6 @@
     constrainDate(true);
     loadData();
   });
-  $("consumptionPrev").addEventListener("click", () => shiftSelection(-1));
-  $("consumptionNext").addEventListener("click", () => shiftSelection(1));
   $("consumptionToday").addEventListener("click", () => {
     $("consumptionDate").value = todayTR();
     constrainDate();
