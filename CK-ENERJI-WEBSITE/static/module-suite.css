@@ -1929,7 +1929,7 @@ body.suite-sidebar-collapsed.ck-suite-page .suite-footer {
   stroke: rgba(248, 251, 255, .96);
   stroke-width: 2.8;
   paint-order: stroke fill;
-  font-size: 12.5px;
+  font-size: var(--basin-label-size, 12.5px);
   font-weight: 850;
   letter-spacing: -.02em;
   pointer-events: none;
@@ -1938,7 +1938,7 @@ body.suite-sidebar-collapsed.ck-suite-page .suite-footer {
 
 .ck-suite-baraj .baraj-basin-map-value {
   fill: #075bd6;
-  font-size: 11px;
+  font-size: calc(var(--basin-label-size, 12.5px) * .88);
   font-weight: 900;
 }
 
