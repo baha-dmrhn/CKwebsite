@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/consumption.css?v=12">
+    <link rel="stylesheet" href="/consumption.css?v=13">
   </head>
   <body>
     <main id="consumption-top" class="consumption-main">
@@ -22,12 +22,7 @@
       <section id="consumption-summary" class="consumption-toolbar" aria-label="Tüketim tarihi ve karşılaştırma ayarları">
         <label class="consumption-date-control" for="consumptionDate">
           <span>Görüntülenen tarih</span>
-          <div class="consumption-date-nav">
-            <button id="consumptionPrev" type="button" aria-label="Önceki gün">‹</button>
-            <output id="consumptionDateDisplay" aria-hidden="true">—</output>
-            <input id="consumptionDate" type="date" required>
-            <button id="consumptionNext" type="button" aria-label="Sonraki gün">›</button>
-          </div>
+          <input id="consumptionDate" type="date" required aria-label="Görüntülenecek tarihi seç">
         </label>
         <label class="consumption-compare-control" for="consumptionCompareDate">
           <span>Karşılaştırma tarihi</span>
@@ -117,6 +112,6 @@
       </section>
     </main>
     <script src="../piyasa-charts.js?v=20"></script>
-    <script src="/consumption.js?v=17" defer></script>
+    <script src="/consumption.js?v=19" defer></script>
   </body>
 </html>
