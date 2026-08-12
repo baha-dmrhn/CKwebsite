@@ -18,7 +18,7 @@ ASSET_VERSIONS: dict[str, int] = {
     "/piyasa-suite.css": 35,
     "/system-direction-forecast.css": 22,
     "/system-direction-forecast.js": 22,
-    "/module-suite.css": 62,
+    "/module-suite.css": 63,
     "/module-suite.js": 16,
     "/executive-report.css": 5,
     "/executive-report.js": 2,
