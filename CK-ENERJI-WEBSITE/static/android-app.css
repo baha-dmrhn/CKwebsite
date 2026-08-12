@@ -617,53 +617,33 @@ body.ck-suite-page .suite-footer,
 
 .ck-suite-tuketim .consumption-date-control,
 .ck-suite-tuketim .consumption-compare-control,
-.ck-suite-tuketim .consumption-date-nav,
+.ck-suite-tuketim .consumption-date-control input,
 .ck-suite-tuketim .consumption-toolbar select {
   width: 100% !important;
   min-width: 0 !important;
 }
 
-.ck-suite-tuketim .consumption-date-nav,
+.ck-suite-tuketim .consumption-date-control input,
 .ck-suite-tuketim .consumption-toolbar select,
 .ck-suite-tuketim .consumption-button {
   min-height: 48px !important;
   border-radius: var(--app-radius-small) !important;
 }
 
-/* Android WebView, type=date alanının takvim parÃ§asÄ±nÄ± dar tutup kalan
-   geniÅŸliÄŸi boÅŸ bÄ±rakabiliyor. Orta hÃ¼creyi ve takvim dÃ¼zenleyicisini
-   barÄ±n tamamÄ±na yayarak tarih kontrolÃ¼nÃ¼ tek parÃ§a gÃ¶ster. */
-.ck-suite-tuketim .consumption-date-nav {
-  position: relative;
-  grid-template-columns: 48px minmax(0, 1fr) 48px !important;
-}
-
-.ck-suite-tuketim .consumption-date-nav output {
-  grid-column: 2;
-  grid-row: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  padding: 0 15px;
-  overflow: hidden;
-  color: var(--app-ink);
-  font-size: 16px;
-  font-weight: 750;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  pointer-events: none;
-}
-
-.ck-suite-tuketim .consumption-date-nav input[type="date"] {
-  grid-column: 2;
-  grid-row: 1;
+/* İki tüketim tarih alanı Android'de de aynı tek parça görünümü kullanır. */
+.ck-suite-tuketim .consumption-date-control input[type="date"] {
   width: 100% !important;
   min-width: 0 !important;
-  max-width: none !important;
-  inline-size: 100% !important;
-  opacity: 0;
+  max-width: 100% !important;
+  height: 48px !important;
+  margin: 0 !important;
+  padding-inline: 13px !important;
+  border: 1px solid #cdd9e9 !important;
+  border-radius: var(--app-radius-small) !important;
+  box-sizing: border-box !important;
+  background: var(--app-surface-soft) !important;
+  font-size: 12px !important;
   cursor: pointer;
-  z-index: 1;
 }
 
 
