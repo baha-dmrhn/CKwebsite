@@ -188,7 +188,7 @@
       if (key === "dam") return `<article class="tv-fixed-card dam"><header><span>02 / BARAJLAR</span><b>Aktif doluluk görünümü</b></header><div class="tv-fixed-kpis">${fixedKpi("ORTALAMA DOLULUK", Number.isFinite(Number(damSummary.average)) ? `%${fmt(damSummary.average)}` : "—", `${damSummary.count || 0} baraj`)}${fixedKpi("EN YÜKSEK", damSummary.highest ? `${damSummary.highest.name} · %${fmt(damSummary.highest.value)}` : "—")}${fixedKpi("EN DÜŞÜK", damSummary.lowest ? `${damSummary.lowest.name} · %${fmt(damSummary.lowest.value)}` : "—")}</div></article>`;
       if (key === "production") return `<article class="tv-fixed-card production"><header><span>03 / ÜRETİM</span><b>UEVM · UEÇM dengesi</b></header><div class="tv-fixed-kpis">${fixedKpi("TOPLAM UEVM", `${fmt(productionSummary.uevmTotal)} MWh`, `${production.period?.uevmHours || 0} saat`)}${fixedKpi("TOPLAM UEÇM", `${fmt(productionSummary.uecmTotal)} MWh`)}${fixedKpi("SAPMA", fmtPercent(productionSummary.deviationPct))}</div></article>`;
       if (key === "consumption") return `<article class="tv-fixed-card consumption"><header><span>04 / TÜKETİM</span><b>Gerçek zamanlı tüketim</b></header><div class="tv-fixed-kpis">${fixedKpi("SON TÜKETİM", `${fmt(consumptionSummary.latest)} MWh`, consumptionSummary.latestHour || "—")}${fixedKpi("GÜNLÜK ORT.", `${fmt(consumptionSummary.average)} MWh`)}${fixedKpi("ZİRVE", `${fmt(consumptionSummary.maximum)} MWh`, consumptionSummary.maximumHour || "—")}</div></article>`;
-      if (key === "currency") return `<article class="tv-fixed-card currency"><header><span>05 / ENERJİ VE DÖVİZ</span><b>${esc(currency.source || "Investing.com · TCMB")}</b></header><div class="tv-fixed-kpis">${fixedKpi("INVESTING USD", `${fmt(investingPairs.USD?.value, 4)} TL`)}${fixedKpi("INVESTING EUR", `${fmt(investingPairs.EUR?.value, 4)} TL`)}${fixedKpi("TCMB USD SATIŞ", `${fmt(currencyPairs.USD?.selling, 4)} TL`, `Alış ${fmt(currencyPairs.USD?.buying, 4)} TL`)}${fixedKpi("TCMB EUR SATIŞ", `${fmt(currencyPairs.EUR?.selling, 4)} TL`, `Alış ${fmt(currencyPairs.EUR?.buying, 4)} TL`)}${fixedKpi("BRENT", `${fmt(commodities.BRENT?.value, 2)} USD/varil`)}${fixedKpi("DUTCH TTF", `${fmt(commodities.TTF?.value, 3)} EUR/MWh`)}</div></article>`;
+      if (key === "currency") return `<article class="tv-fixed-card currency"><header><span>05 / ENERJİ VE DÖVİZ</span><b>${esc(currency.source || "Investing.com · TCMB")}</b></header><div class="tv-fixed-kpis">${fixedKpi("USD / TRY", `${fmt(investingPairs.USD?.value, 4)} TL`, `TCMB satış ${fmt(currencyPairs.USD?.selling, 4)} TL`)}${fixedKpi("EUR / TRY", `${fmt(investingPairs.EUR?.value, 4)} TL`, `TCMB satış ${fmt(currencyPairs.EUR?.selling, 4)} TL`)}${fixedKpi("BRENT", `${fmt(commodities.BRENT?.value, 2)} USD/varil`)}${fixedKpi("DUTCH TTF", `${fmt(commodities.TTF?.value, 3)} EUR/MWh`)}</div></article>`;
       return `<article class="tv-fixed-card overview"><header><span>GENEL DURUM</span><b>Sistemin bugünkü nabzı</b></header><div class="tv-overview-summary"><div class="tv-overview-lead"><span>GÜNÜN PİYASA GÖSTERGESİ</span><strong>${esc(`${fmt(ptfAverage)} TL/MWh`)}</strong><small>${esc(`${marketSummary.ptfPublishedHours || 0} saatlik PTF verisi yayınlandı`)}</small></div><div class="tv-overview-metrics">${fixedKpi("ORTALAMA BARAJ DOLULUĞU", Number.isFinite(Number(damSummary.average)) ? `%${fmt(damSummary.average)}` : "—", `${damSummary.count || 0} baraj`)}${fixedKpi("TÜKETİM ZİRVESİ", `${fmt(consumptionSummary.maximum)} MWh`, consumptionSummary.maximumHour || "—")}</div><div class="tv-overview-status"><i></i><span>Piyasa, baraj ve tüketim verileri tek özette izleniyor</span></div></div></article>`;
     });
     target.dataset.count = String(cards.length);
@@ -218,12 +218,9 @@
 
   function renderCurrencyPair(base, pair) {
     const prefix = base === "USD" ? "Usd" : "Eur";
-    setText(`tv${prefix}Value`, fmt(pair?.value, 4));
     setText(`tv${prefix}Previous`, `${fmt(pair?.buying, 4)} TL`);
     setText(`tv${prefix}Time`, `${fmt(pair?.selling, 4)} TL`);
     setText(`tv${prefix}Change`, pair?.quoteTimeLabel ? `TCMB · ${pair.quoteTimeLabel}` : "TCMB kuru bulunamadı");
-    const card = $(`tv${prefix}Value`)?.closest(".tv-currency-card");
-    if (card) card.dataset.direction = pair?.direction || "flat";
   }
 
   function quoteTimeLabel(value) {
