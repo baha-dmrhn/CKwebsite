@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
     <meta name="theme-color" content="#071225">
     <title>CK Enerji · TV Modu</title>
-    <link rel="stylesheet" href="tv.css?v=24">
+    <link rel="stylesheet" href="tv.css?v=26">
     <link rel="icon" href="/favicon.ico?v=2">
   </head>
   <body>
@@ -63,27 +63,15 @@
         <div class="tv-currency-layout">
           <article class="tv-currency-card investing-usd" data-direction="flat">
             <header><div><span>INVESTING.COM</span><b>USD / TRY</b></div><i>$</i></header>
-            <div class="tv-currency-price"><strong id="tvInvUsdValue">—</strong><small>Türk lirası</small></div>
+            <div class="tv-currency-main"><div class="tv-currency-price"><strong id="tvInvUsdValue">—</strong><small>Türk lirası</small></div><aside class="tv-tcmb-inline"><span>TCMB USD</span><div><small>ALIŞ</small><b id="tvUsdPrevious">—</b></div><div><small>SATIŞ</small><b id="tvUsdTime">—</b></div><em id="tvUsdChange">—</em></aside></div>
             <div class="tv-currency-change" id="tvInvUsdChange">Günlük değişim bekleniyor</div>
             <footer><div><span>ÖNCEKİ KAPANIŞ</span><b id="tvInvUsdPrevious">—</b></div><div><span>VERİ SAATİ</span><b id="tvInvUsdTime">—</b></div></footer>
           </article>
           <article class="tv-currency-card investing-eur" data-direction="flat">
             <header><div><span>INVESTING.COM</span><b>EUR / TRY</b></div><i>€</i></header>
-            <div class="tv-currency-price"><strong id="tvInvEurValue">—</strong><small>Türk lirası</small></div>
+            <div class="tv-currency-main"><div class="tv-currency-price"><strong id="tvInvEurValue">—</strong><small>Türk lirası</small></div><aside class="tv-tcmb-inline"><span>TCMB EUR</span><div><small>ALIŞ</small><b id="tvEurPrevious">—</b></div><div><small>SATIŞ</small><b id="tvEurTime">—</b></div><em id="tvEurChange">—</em></aside></div>
             <div class="tv-currency-change" id="tvInvEurChange">Günlük değişim bekleniyor</div>
             <footer><div><span>ÖNCEKİ KAPANIŞ</span><b id="tvInvEurPrevious">—</b></div><div><span>VERİ SAATİ</span><b id="tvInvEurTime">—</b></div></footer>
-          </article>
-          <article class="tv-currency-card usd" data-direction="flat">
-            <header><div><span>TCMB · ABD DOLARI</span><b>USD / TRY</b></div><i>$</i></header>
-            <div class="tv-currency-price"><strong id="tvUsdValue">—</strong><small>TL · döviz satış</small></div>
-            <div class="tv-currency-change" id="tvUsdChange">TCMB kuru bekleniyor</div>
-            <footer><div><span>DÖVİZ ALIŞ</span><b id="tvUsdPrevious">—</b></div><div><span>DÖVİZ SATIŞ</span><b id="tvUsdTime">—</b></div></footer>
-          </article>
-          <article class="tv-currency-card eur" data-direction="flat">
-            <header><div><span>TCMB · EURO</span><b>EUR / TRY</b></div><i>€</i></header>
-            <div class="tv-currency-price"><strong id="tvEurValue">—</strong><small>TL · döviz satış</small></div>
-            <div class="tv-currency-change" id="tvEurChange">TCMB kuru bekleniyor</div>
-            <footer><div><span>DÖVİZ ALIŞ</span><b id="tvEurPrevious">—</b></div><div><span>DÖVİZ SATIŞ</span><b id="tvEurTime">—</b></div></footer>
           </article>
           <article class="tv-currency-card brent" data-direction="flat">
             <header><div><span>INVESTING.COM</span><b>BRENT PETROL</b></div><i>Br</i></header>
@@ -97,7 +85,7 @@
             <div class="tv-currency-change" id="tvTtfChange">Günlük değişim bekleniyor</div>
             <footer><div><span>ÖNCEKİ KAPANIŞ</span><b id="tvTtfPrevious">—</b></div><div><span>VERİ SAATİ</span><b id="tvTtfTime">—</b></div></footer>
           </article>
-          <aside class="tv-currency-source"><div><span>VERİ KAYNAKLARI</span><strong id="tvCurrencySource">Investing.com · TCMB</strong><p id="tvCurrencyStatus">Altı gösterge hazırlanıyor.</p></div><div class="tv-currency-source-links"><a id="tvInvestingUsdSourceLink" href="https://tr.investing.com/currencies/usd-try" target="_blank" rel="noopener noreferrer">Investing USD</a><a id="tvInvestingEurSourceLink" href="https://tr.investing.com/currencies/eur-try" target="_blank" rel="noopener noreferrer">Investing EUR</a><a id="tvBrentSourceLink" href="https://www.investing.com/commodities/brent-oil-historical-data" target="_blank" rel="noopener noreferrer">Brent</a><a id="tvTtfSourceLink" href="https://tr.investing.com/commodities/dutch-ttf-gas-c1-futures-historical-data" target="_blank" rel="noopener noreferrer">Dutch TTF</a><a id="tvTcmbSourceLink" href="https://www.tcmb.gov.tr/kurlar/today.xml" target="_blank" rel="noopener noreferrer">TCMB USD/EUR</a></div></aside>
+          <aside class="tv-currency-source"><div><span>VERİ KAYNAKLARI</span><strong id="tvCurrencySource">Investing.com · TCMB</strong><p id="tvCurrencyStatus">Dört kart hazırlanıyor.</p></div><div class="tv-currency-source-links"><a id="tvInvestingUsdSourceLink" href="https://tr.investing.com/currencies/usd-try" target="_blank" rel="noopener noreferrer">Investing USD</a><a id="tvInvestingEurSourceLink" href="https://tr.investing.com/currencies/eur-try" target="_blank" rel="noopener noreferrer">Investing EUR</a><a id="tvBrentSourceLink" href="https://www.investing.com/commodities/brent-oil-historical-data" target="_blank" rel="noopener noreferrer">Brent</a><a id="tvTtfSourceLink" href="https://tr.investing.com/commodities/dutch-ttf-gas-c1-futures-historical-data" target="_blank" rel="noopener noreferrer">Dutch TTF</a><a id="tvTcmbSourceLink" href="https://www.tcmb.gov.tr/kurlar/today.xml" target="_blank" rel="noopener noreferrer">TCMB USD/EUR</a></div></aside>
         </div>
       </section>
       <section id="tvFixedDashboard" class="tv-fixed-dashboard" hidden aria-labelledby="tvFixedDashboardTitle">
@@ -132,6 +120,6 @@
     <aside class="tv-alert-panel" id="tvAlertPanel" aria-hidden="true" aria-labelledby="tvAlertTitle"><div class="tv-alert-card" role="dialog" aria-modal="false"><header><div><span>VERİ DURUMU</span><h2 id="tvAlertTitle">Bağlantı ve veri uyarıları</h2></div><button id="tvAlertClose" type="button" aria-label="Uyarıları kapat">×</button></header><div id="tvAlertList"></div></div></aside>
     <div id="tvLoading" class="tv-loading"><img src="/suite-assets/ck-mark.png?v=3" alt=""><strong>Komuta merkezi hazırlanıyor</strong><span>EPİAŞ verileri bir araya getiriliyor…</span></div>
     <script src="tv-settings.js?v=17" defer></script>
-    <script src="tv.js?v=24" defer></script>
+    <script src="tv.js?v=25" defer></script>
   </body>
 </html>
