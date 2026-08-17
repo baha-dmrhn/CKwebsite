@@ -157,7 +157,7 @@
 
   <div id="dashboard" class="page d-none">
     <header class="navbar navbar-expand-md navbar-light"><div class="container-xl"><a class="navbar-brand d-flex align-items-center" href="#"><img src="/icons/icon-192.png" width="40" height="40" alt="CK Enerji Baraj" class="me-2"><span>CK Enerji</span></a><button id="logoutButton" class="btn btn-outline-secondary btn-sm" type="button">Çıkış yap</button></div></header>
-    <div class="page-wrapper"><div class="page-header"><div class="container-xl"><div class="row g-2 align-items-center"><div class="col"><h2 class="page-title">CK Enerji Baraj Doluluk Paneli</h2></div><div class="col-auto ms-auto"><label class="baraj-date-control" for="barajDateSelect"><span>Görüntülenen tarih</span><select id="barajDateSelect" aria-label="Baraj verisi tarihini seç"><option value="">Güncel veri</option></select></label><button id="refreshButton" class="btn btn-primary" type="button">Verileri yenile</button></div></div></div></div>
+    <div class="page-wrapper"><div class="page-header"><div class="container-xl"><div class="row g-2 align-items-center"><div class="col"><h2 class="page-title">CK Enerji Baraj Doluluk Paneli</h2></div><div class="col-auto ms-auto d-flex align-items-end gap-2 flex-wrap"><label class="baraj-date-control" for="barajDateSelect"><span>Görüntülenen tarih</span><select id="barajDateSelect" aria-label="Baraj verisi tarihini seç"><option value="">Güncel veri</option></select></label><button id="refreshButton" class="btn btn-primary" type="button">Verileri yenile</button><button id="excelRefreshButton" class="btn btn-primary" type="button" title="EPİAŞ'ın son yayımlanan gününü Excel arşivinde güncelle">Excel'i güncelle</button></div></div></div></div>
       <div class="page-body"><div class="container-xl"><div id="alert" class="alert d-none" role="alert"></div>
         <div class="row row-deck row-cards mb-3"><div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="subheader">Toplam baraj</div><div id="total" class="h1 mb-0">-</div></div></div></div><div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="subheader" title="Baraj kapasiteleriyle ağırlıklandırılmamış aritmetik ortalama">Basit ort. doluluk</div><div id="average" class="h1 mb-0">-</div></div></div></div><div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="subheader">En yüksek</div><div id="highest" class="h3 mb-0">-</div></div></div></div><div class="col-sm-6 col-lg-3"><div class="card"><div class="card-body"><div class="subheader">En düşük</div><div id="lowest" class="h3 mb-0">-</div></div></div></div></div>
         <section class="baraj-insight-card mb-3" aria-labelledby="barajInsightTitle"><div class="baraj-insight-icon" aria-hidden="true">✦</div><div><span class="subheader">OTOMATİK BARAJ YORUMU</span><h3 id="barajInsightTitle">Günlük doluluk notu</h3><p id="barajInsightText">Baraj verileri analiz ediliyor…</p></div></section>
@@ -331,6 +331,13 @@
       try {
         sessionStorage.setItem(BARAJ_CLIENT_CACHE_PREFIX + (selectedDate || 'latest'), JSON.stringify({savedAt:Date.now(), payload}));
       } catch { /* Tarayıcı depolaması kapalıysa sunucu önbelleği kullanılır. */ }
+    }
+    function clearBarajClientCache() {
+      try {
+        Object.keys(sessionStorage)
+          .filter(key => key.startsWith(BARAJ_CLIENT_CACHE_PREFIX))
+          .forEach(key => sessionStorage.removeItem(key));
+      } catch { /* Tarayıcı depolaması kapalıysa temizlenecek istemci önbelleği yoktur. */ }
     }
     const barajConnection = {primary:'idle', basin:'idle', primaryDetail:'', basinDetail:''};
     const knownDates = new Set(), archiveDates = new Set();
@@ -1272,6 +1279,42 @@
         $('barajDateSelect').disabled = false;
       }
     }
+    async function refreshExcelArchive() {
+      const button = $('excelRefreshButton');
+      const refreshButton = $('refreshButton');
+      button.disabled = true;
+      refreshButton.disabled = true;
+      button.setAttribute('aria-busy', 'true');
+      button.textContent = 'Excel güncelleniyor…';
+      alert('EPİAŞ verisi alınıyor ve Excel arşivi güncelleniyor…', 'info');
+      try {
+        const response = await fetch('/api/archive-refresh', {
+          method: 'POST',
+          credentials: 'same-origin'
+        });
+        const payload = await response.json();
+        if (!response.ok) {
+          if (response.status === 401) {
+            showLogin();
+            return;
+          }
+          throw new Error(payload.error || payload.reason || 'Excel arşivi güncellenemedi.');
+        }
+        clearBarajClientCache();
+        $('barajDateSelect').value = '';
+        await load(true);
+        await loadBasinHistory();
+        const action = payload.action === 'added' ? 'Excel arşivine eklendi' : 'Excel arşivinde güncellendi';
+        alert(`${displayDate(payload.date)} tarihli ${payload.recordCount} baraj kaydı ${action}.`, 'success');
+      } catch (error) {
+        alert(error.message || 'Excel arşivi güncellenemedi.', 'danger');
+      } finally {
+        button.disabled = false;
+        refreshButton.disabled = false;
+        button.removeAttribute('aria-busy');
+        button.textContent = "Excel'i güncelle";
+      }
+    }
     $('loginForm').addEventListener('submit', async e => {
       e.preventDefault();
       const button = $('loginButton'), error = $('loginError'), username = $('username').value.trim(), password = $('password').value;
@@ -1326,7 +1369,9 @@
       const params = new URLSearchParams({sort: $('sortSelect').value, date: $('barajDateSelect').value});
       window.location.href = `/api/export.xlsx?${params.toString()}`;
     });
-    $('refreshButton').addEventListener('click', () => { load(true); loadBasinHistory(); }); applyInitialBarajUrlState(); restoreSession();
+    $('refreshButton').addEventListener('click', () => { load(true); loadBasinHistory(); });
+    $('excelRefreshButton').addEventListener('click', refreshExcelArchive);
+    applyInitialBarajUrlState(); restoreSession();
   </script>
 </body>
 </html>
