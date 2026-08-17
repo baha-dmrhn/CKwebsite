@@ -39,9 +39,7 @@ services:
         value: 600
       - key: CK_BG_CONSUMPTION_SECONDS
         value: 600
-      - key: CK_BG_BARAJ_HOURS
-        value: "17,18"
-      - key: CK_BARAJ_REFRESH_ON_LOGIN
+      - key: CK_BARAJ_REFRESH_ON_ACCESS
         value: "true"
       - key: CK_BG_URETIM_SECONDS
         value: 3600
